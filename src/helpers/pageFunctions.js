@@ -1,4 +1,4 @@
-import { searchCities, getWeatherByCity, erroDetectado } from './weatherAPI';
+import { searchCities, getWeatherByCity } from './weatherAPI';
 
 /**
  * Cria um elemento HTML com as informações passadas
