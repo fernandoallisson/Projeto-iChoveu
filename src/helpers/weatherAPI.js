@@ -1,8 +1,9 @@
 const TOKEN = import.meta.env.VITE_TOKEN;
-const erroDetectado = () => {
+export const erroDetectado = () => {
   window.alert('Nenhuma cidade encontrada');
   return [];
 };
+
 export const searchCities = async (term) => { // Aqui retorna uma cidade que for digitada no term
   const URLs = `http://api.weatherapi.com/v1/search.json?lang=pt&key=${TOKEN}&q=${term}`;
   if (!term) {
@@ -16,10 +17,8 @@ export const searchCities = async (term) => { // Aqui retorna uma cidade que for
   return data;
 };
 
-export const getWeatherByCity = async (cityURL) => {
-  const urls = (await searchCities(cityURL)).map(({ url }) => url);
-  console.log(urls);
-  const response = await fetch(`http://api.weatherapi.com/v1/current.json?lang=pt&key=${TOKEN}&q=${urls}`);
+export const getWeatherByCity = async (cityURL) => { // Aqui retorna algumas informações das cidades
+  const response = await fetch(`http://api.weatherapi.com/v1/current.json?lang=pt&key=${TOKEN}&q=${cityURL}`);
   const data = await response.json();
   return {
     temp: data.current.temp_c,
@@ -27,5 +26,3 @@ export const getWeatherByCity = async (cityURL) => {
     icon: data.current.condition.icon,
   };
 };
-
-console.log(await getWeatherByCity('sao-paulo-sao-paulo-brazil'));
