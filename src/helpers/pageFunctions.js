@@ -104,6 +104,7 @@ export function createCityElement(cityInfo) {
   cityElement.appendChild(headingElement);
   cityElement.appendChild(infoContainer);
 
+  console.log(cityElement);
   return cityElement;
 }
 
