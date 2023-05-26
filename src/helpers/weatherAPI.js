@@ -1,4 +1,5 @@
 const TOKEN = import.meta.env.VITE_TOKEN;
+
 export const erroDetectado = () => {
   window.alert('Nenhuma cidade encontrada');
   return [];

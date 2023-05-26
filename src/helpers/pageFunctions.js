@@ -1,4 +1,6 @@
-import { searchCities, getWeatherByCity } from './weatherAPI';
+import { searchCities, getWeatherByCity, erroDetectado } from './weatherAPI';
+
+const TOKEN = import.meta.env.VITE_TOKEN;
 
 /**
  * Cria um elemento HTML com as informações passadas
@@ -73,11 +75,25 @@ export function showForecast(forecastList) {
   forecastContainer.classList.remove('hidden');
 }
 
+export const get7DayForecast = async (cityURL) => {
+  const response = await fetch(`http://api.weatherapi.com/v1/forecast.json?lang=pt&key=${TOKEN}&q=${cityURL}&days=7`);
+  const data = await response.json();
+  const forecastList = data.forecast.forecastday.map((day) => {
+    return {
+      date: day.date,
+      maxTemp: day.day.maxtemp_c,
+      minTemp: day.day.mintemp_c,
+      condition: day.day.condition.text,
+      icon: day.day.condition.icon,
+    };
+  });
+  return forecastList;
+};
 /**
  * Recebe um objeto com as informações de uma cidade e retorna um elemento HTML
  */
 export function createCityElement(cityInfo) {
-  const { name, country, temp, condition, icon /* , url */ } = cityInfo;
+  const { name, country, temp, condition, icon, url } = cityInfo;
 
   const cityElement = createElement('li', 'city');
 
@@ -101,10 +117,16 @@ export function createCityElement(cityInfo) {
   infoContainer.appendChild(tempContainer);
   infoContainer.appendChild(iconElement);
 
+  const forecastButton = createElement('button', 'forecast-button', 'Ver previsão');
+  forecastButton.addEventListener('click', async () => {
+    const forecast = await get7DayForecast(url);
+    showForecast(forecast);
+  });
+
   cityElement.appendChild(headingElement);
   cityElement.appendChild(infoContainer);
+  cityElement.appendChild(forecastButton);
 
-  console.log(cityElement);
   return cityElement;
 }
 
@@ -117,10 +139,26 @@ export async function handleSearch(event) {
 
   const searchInput = document.getElementById('search-input');
   const searchValue = searchInput.value;
-  const cities = await searchCities(searchValue); // retorna []
+  const cities = await searchCities(searchValue);
 
-  cities.forEach(async (element) => {
-    const urlDaCity = element.url;
-    await getWeatherByCity(urlDaCity);
+  if (cities.length === 0) {
+    erroDetectado();
+    return;
+  }
+
+  const citiesList = document.getElementById('cities');
+  cities.forEach(async (city) => {
+    const { name, country, url } = city;
+    const weatherData = await getWeatherByCity(url);
+    const cityInfo = {
+      name,
+      country,
+      temp: weatherData.temp,
+      condition: weatherData.condition,
+      icon: weatherData.icon,
+      url,
+    };
+    const cityElement = createCityElement(cityInfo);
+    citiesList.appendChild(cityElement);
   });
 }
